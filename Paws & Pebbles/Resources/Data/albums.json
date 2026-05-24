@@ -1,0 +1,56 @@
+[
+  {
+    "title": "Our Adventures",
+    "subtitle": "Exploring together",
+    "coverImageFilename": "adventures-cover.jpg",
+    "date": "2023-01-01T00:00:00Z",
+    "mediaFilenames": ["adventure-1.jpg", "adventure-2.jpg", "adventure-3.jpg"],
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#143328"
+  },
+  {
+    "title": "Date Nights",
+    "subtitle": "Every moment counts",
+    "coverImageFilename": "dates-cover.jpg",
+    "date": "2023-03-01T00:00:00Z",
+    "mediaFilenames": ["date-1.jpg", "date-2.jpg"],
+    "gradientColor1": "#163c5a",
+    "gradientColor2": "#0c2238"
+  },
+  {
+    "title": "Rock Collection",
+    "subtitle": "Your beautiful finds",
+    "coverImageFilename": "rocks-cover.jpg",
+    "date": "2023-06-01T00:00:00Z",
+    "mediaFilenames": ["rock-1.jpg", "rock-2.jpg", "rock-3.jpg", "rock-4.jpg"],
+    "gradientColor1": "#2e5040",
+    "gradientColor2": "#0c2238"
+  },
+  {
+    "title": "Lazy Sundays",
+    "subtitle": "Our favorite day",
+    "coverImageFilename": "sundays-cover.jpg",
+    "date": "2023-09-01T00:00:00Z",
+    "mediaFilenames": ["sunday-1.jpg", "sunday-2.jpg"],
+    "gradientColor1": "#1a5c42",
+    "gradientColor2": "#143328"
+  },
+  {
+    "title": "Celebrations",
+    "subtitle": "Milestones together",
+    "coverImageFilename": "celebrations-cover.jpg",
+    "date": "2024-01-01T00:00:00Z",
+    "mediaFilenames": ["celebration-1.jpg", "celebration-2.jpg", "celebration-3.jpg"],
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#163c5a"
+  },
+  {
+    "title": "Her Puppies",
+    "subtitle": "Always in our hearts",
+    "coverImageFilename": "puppies-cover.jpg",
+    "date": "2024-06-01T00:00:00Z",
+    "mediaFilenames": ["puppy-1.jpg", "puppy-2.jpg"],
+    "gradientColor1": "#2e5040",
+    "gradientColor2": "#143328"
+  }
+]

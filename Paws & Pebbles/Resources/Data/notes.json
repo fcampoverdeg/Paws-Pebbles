@@ -1,0 +1,110 @@
+[
+  {
+    "message": "You're my favorite hello and my hardest goodbye.",
+    "date": "2024-01-15T00:00:00Z",
+    "category": "love",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#2e5040"
+  },
+  {
+    "message": "Every moment with you is a pebble I treasure.",
+    "date": "2024-02-14T00:00:00Z",
+    "category": "love",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#143328"
+  },
+  {
+    "message": "Like the rocks you study, my love for you is ancient and enduring.",
+    "date": "2024-03-10T00:00:00Z",
+    "category": "love",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#2e5040"
+  },
+  {
+    "message": "Remember when we got lost on that hike and found the most beautiful waterfall? That's us — always finding magic in the unexpected.",
+    "date": "2024-04-05T00:00:00Z",
+    "category": "memory",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#143328",
+    "gradientColor2": "#0c2238"
+  },
+  {
+    "message": "I know the distance is hard right now. Close your eyes and feel my arms around you. I'm always right here.",
+    "date": "2024-05-20T00:00:00Z",
+    "category": "openWhen",
+    "openWhenCondition": "Open when you miss me",
+    "isRevealed": false,
+    "gradientColor1": "#163c5a",
+    "gradientColor2": "#1a3d58"
+  },
+  {
+    "message": "Thank you for being patient with me, for laughing at my jokes, and for choosing us every single day.",
+    "date": "2024-06-01T00:00:00Z",
+    "category": "gratitude",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#163c5a"
+  },
+  {
+    "message": "You've got this. Whatever today throws at you, remember that you are stronger than any stone, and twice as beautiful.",
+    "date": "2024-07-12T00:00:00Z",
+    "category": "encouragement",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#2e5040",
+    "gradientColor2": "#143328"
+  },
+  {
+    "message": "No reason. Just thinking about you and smiling.",
+    "date": "2024-08-30T00:00:00Z",
+    "category": "justBecause",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#2e5040"
+  },
+  {
+    "message": "When today feels too heavy, put it down. Tomorrow is a new layer of sediment, a new chance to shine.",
+    "date": "2024-09-15T00:00:00Z",
+    "category": "openWhen",
+    "openWhenCondition": "Open when you're having a bad day",
+    "isRevealed": false,
+    "gradientColor1": "#163c5a",
+    "gradientColor2": "#0c2238"
+  },
+  {
+    "message": "You make ordinary moments extraordinary.",
+    "date": "2024-10-10T00:00:00Z",
+    "category": "love",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#143328"
+  },
+  {
+    "message": "Four years down, forever to go.",
+    "date": "2024-11-01T00:00:00Z",
+    "category": "love",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#1a5c42",
+    "gradientColor2": "#0c3626"
+  },
+  {
+    "message": "Your puppies would be so proud of the person you are. They chose well when they chose you.",
+    "date": "2024-12-01T00:00:00Z",
+    "category": "encouragement",
+    "openWhenCondition": null,
+    "isRevealed": true,
+    "gradientColor1": "#2e5040",
+    "gradientColor2": "#143328"
+  }
+]

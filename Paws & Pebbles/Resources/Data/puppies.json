@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Puppy 1",
+    "photoFilename": "puppy1.jpg",
+    "message": "Forever in our hearts. Your paw prints lead the way.",
+    "years": null
+  },
+  {
+    "name": "Puppy 2",
+    "photoFilename": "puppy2.jpg",
+    "message": "Always by your side, even now. We carry you with us.",
+    "years": null
+  }
+]

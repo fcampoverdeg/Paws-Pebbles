@@ -1,8 +1,6 @@
-//___FILEHEADER___
-
 import Testing
 
-struct ___FILEBASENAME:identifier___ {
+struct PawsAndPebblesTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

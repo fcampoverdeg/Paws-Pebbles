@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Our Anniversary",
+    "targetDate": "2026-06-20T00:00:00Z",
+    "emoji": "💕",
+    "gradientColor1": "#1a5c42",
+    "gradientColor2": "#0c3626"
+  },
+  {
+    "title": "Natty's Birthday",
+    "targetDate": "2026-10-21T00:00:00Z",
+    "emoji": "🎂",
+    "gradientColor1": "#265e46",
+    "gradientColor2": "#143328"
+  },
+  {
+    "title": "Next Trip Together",
+    "targetDate": "2026-08-15T00:00:00Z",
+    "emoji": "✈️",
+    "gradientColor1": "#163c5a",
+    "gradientColor2": "#0c2238"
+  }
+]
