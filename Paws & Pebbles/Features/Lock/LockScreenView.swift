@@ -1,7 +1,11 @@
 import SwiftUI
 
 struct LockScreenView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Binding var isUnlocked: Bool
+    @AppStorage("pinEnabled") private var pinEnabled = true
+    @AppStorage("pinLength") private var pinLength = 4
+    @AppStorage("useFaceID") private var useFaceID = true
     @State private var enteredPin = ""
     @State private var isShaking = false
     @State private var showSuccess = false
@@ -9,8 +13,6 @@ struct LockScreenView: View {
     @State private var isSettingPin = false
     @State private var appeared = false
     @State private var ringRotation: Double = 0
-
-    private let correctPinLength = 4
 
     var body: some View {
         ZStack {
@@ -62,7 +64,7 @@ struct LockScreenView: View {
                     }
                     .opacity(appeared ? 1 : 0)
 
-                    Text("YOUR STORY, ONE STONE AT A TIME")
+                    Text("YOUR STORY, ONE PEBBLE AT A TIME")
                         .font(AppFonts.subtitle)
                         .tracking(3.5)
                         .foregroundColor(AppColors.textMuted)
@@ -71,7 +73,7 @@ struct LockScreenView: View {
 
                 // PIN dots
                 HStack(spacing: 18) {
-                    ForEach(0..<correctPinLength, id: \.self) { index in
+                    ForEach(0..<pinLength, id: \.self) { index in
                         ZStack {
                             Circle()
                                 .stroke(AppColors.river.opacity(0.3), lineWidth: 1.5)
@@ -146,13 +148,21 @@ struct LockScreenView: View {
             }
         }
         .onAppear {
+            // Skip lock screen if PIN is disabled
+            if !pinEnabled {
+                isUnlocked = true
+                return
+            }
+
             isSettingPin = !AuthService.shared.hasPin()
             withAnimation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.1)) { appeared = true }
             withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) { breatheScale = 1.08 }
             withAnimation(.linear(duration: 20).repeatForever(autoreverses: false)) { ringRotation = 360 }
-
-            if !isSettingPin {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // Only trigger Face ID when app becomes active (user is looking at the app)
+            if newPhase == .active && !isUnlocked && !isSettingPin && useFaceID {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     AuthService.shared.authenticateWithBiometrics { success in
                         if success { unlockSuccess() }
                     }
@@ -163,20 +173,20 @@ struct LockScreenView: View {
 
     private func numberButton(_ number: Int) -> some View {
         Button {
-            guard enteredPin.count < correctPinLength else { return }
+            guard enteredPin.count < pinLength else { return }
             enteredPin += "\(number)"
             AppHaptics.photoTap()
-            if enteredPin.count == correctPinLength { validatePin() }
+            if enteredPin.count == pinLength { validatePin() }
         } label: {
             Text("\(number)")
-                .font(.system(size: 26, weight: .light, design: .rounded))
+                .font(.system(size: 28, weight: .medium, design: .rounded))
                 .foregroundColor(AppColors.textPrimary)
-                .frame(width: 68, height: 68)
-                .background(
+                .frame(width: 72, height: 72)
+                .overlay(
                     Circle()
-                        .fill(AppColors.cardBg)
-                        .overlay(Circle().stroke(AppColors.cardBorder, lineWidth: 0.5))
+                        .stroke(AppColors.textPrimary.opacity(0.15), lineWidth: 1.5)
                 )
+                .glassEffect(.regular.interactive(), in: .circle)
         }
         .buttonStyle(ScaleButtonStyle())
     }

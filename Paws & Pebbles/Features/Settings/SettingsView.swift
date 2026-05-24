@@ -4,21 +4,27 @@ import LocalAuthentication
 struct SettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @AppStorage("useFaceID") private var useFaceID = true
-    @AppStorage("partnerName1") private var partnerName1 = "S"
+    @AppStorage("pinEnabled") private var pinEnabled = true
+    @AppStorage("pinLength") private var pinLength = 4
+    @AppStorage("partnerName1") private var partnerName1 = "Sebi"
     @AppStorage("partnerName2") private var partnerName2 = "Natty"
-    @AppStorage("anniversaryDate") private var anniversaryTimestamp: Double = {
-        var components = DateComponents()
-        components.year = 2022
-        components.month = 6
-        components.day = 20
-        return (Calendar.current.date(from: components) ?? Date()).timeIntervalSince1970
-    }()
-    @AppStorage("notificationsEnabled") private var notificationsEnabled = true
+    @AppStorage("hapticsEnabled") private var hapticsEnabled = true
+    @AppStorage("parallaxEnabled") private var parallaxEnabled = true
+    @AppStorage("dailyNotificationEnabled") private var dailyNotificationEnabled = false
+    @AppStorage("dailyNotificationHour") private var dailyNotificationHour = 9
+    @AppStorage("lockDelay") private var lockDelay = 0 // 0 = immediately
 
     @State private var showChangePIN = false
-    @State private var showResetConfirmation = false
-    @State private var anniversaryDate: Date = Date()
+    @State private var showSetupPIN = false
+    @State private var showClearDataConfirm = false
     @State private var biometricsAvailable = false
+
+    private let lockDelayOptions = [
+        (0, "Immediately"),
+        (30, "After 30 seconds"),
+        (60, "After 1 minute"),
+        (300, "After 5 minutes")
+    ]
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -31,6 +37,7 @@ struct SettingsView: View {
 
                 // Appearance
                 section(title: "APPEARANCE") {
+                    // Theme toggle
                     HStack {
                         Label {
                             VStack(alignment: .leading, spacing: 2) {
@@ -44,9 +51,7 @@ struct SettingsView: View {
                         }
                         Spacer()
                         ZStack {
-                            Capsule()
-                                .fill(AppColors.cardBg)
-                                .frame(width: 70, height: 34)
+                            Capsule().fill(AppColors.cardBg).frame(width: 70, height: 34)
                                 .overlay(Capsule().stroke(AppColors.cardBorder, lineWidth: 1))
                             HStack(spacing: 4) {
                                 Image(systemName: "sun.max.fill").font(.system(size: 11))
@@ -56,9 +61,7 @@ struct SettingsView: View {
                                     .foregroundColor(themeManager.isDarkMode ? AppColors.river : AppColors.textDim)
                             }
                             .padding(.horizontal, 10).frame(width: 70)
-                            Circle()
-                                .fill(AppColors.river)
-                                .frame(width: 26, height: 26)
+                            Circle().fill(AppColors.river).frame(width: 26, height: 26)
                                 .shadow(color: AppColors.river.opacity(0.3), radius: 4)
                                 .offset(x: themeManager.isDarkMode ? 16 : -16)
                                 .animation(.spring(response: 0.35, dampingFraction: 0.7), value: themeManager.isDarkMode)
@@ -69,19 +72,99 @@ struct SettingsView: View {
                         }
                     }
                     .padding(16)
-                    .background(RoundedRectangle(cornerRadius: 14).fill(AppColors.cardBg)
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.cardBorder, lineWidth: 1)))
+                    .settingsCard()
+
+                    // Parallax
+                    toggleRow(icon: "cube.transparent", title: "3D Parallax",
+                             subtitle: "Photo moves when you tilt the phone", isOn: $parallaxEnabled)
+
+                    // Haptics
+                    toggleRow(icon: "waveform", title: "Haptics",
+                             subtitle: "Vibration feedback on interactions", isOn: $hapticsEnabled)
                 }
 
                 // Security
                 section(title: "SECURITY") {
+                    // PIN toggle
+                    toggleRow(icon: "lock.fill", title: "PIN Lock",
+                             subtitle: pinEnabled ? "\(pinLength)-digit PIN active" : "No PIN set",
+                             isOn: Binding(
+                                get: { pinEnabled },
+                                set: { newValue in
+                                    if newValue { showSetupPIN = true }
+                                    else { pinEnabled = false; AuthService.shared.savePin("") }
+                                }
+                             ))
+
+                    if pinEnabled {
+                        buttonRow(icon: "lock.rotation", title: "Change PIN",
+                                 subtitle: "Set a new PIN (4-6 digits)") {
+                            showChangePIN = true
+                        }
+
+                        // Lock delay
+                        HStack {
+                            Label {
+                                Text("Lock after closing").font(AppFonts.body).foregroundColor(AppColors.textPrimary)
+                            } icon: {
+                                Image(systemName: "timer").foregroundColor(AppColors.river).frame(width: 20)
+                            }
+                            Spacer()
+                            Menu {
+                                ForEach(lockDelayOptions, id: \.0) { seconds, label in
+                                    Button {
+                                        lockDelay = seconds
+                                    } label: {
+                                        HStack {
+                                            Text(label)
+                                            if lockDelay == seconds {
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                Text(lockDelayOptions.first { $0.0 == lockDelay }?.1 ?? "Immediately")
+                                    .font(AppFonts.badge)
+                                    .foregroundColor(AppColors.river)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(AppColors.river)
+                            }
+                        }
+                        .padding(16)
+                        .settingsCard()
+                    }
+
+                    // Face ID
                     toggleRow(icon: "faceid", title: "Use Face ID",
                              subtitle: biometricsAvailable ? "Unlock with biometrics" : "Not available",
                              isOn: $useFaceID)
                         .disabled(!biometricsAvailable)
+                }
 
-                    buttonRow(icon: "lock.rotation", title: "Change PIN", subtitle: "Update your 4-digit PIN") {
-                        showChangePIN = true
+                // Notifications
+                section(title: "NOTIFICATIONS") {
+                    toggleRow(icon: "bell.fill", title: "Daily Pebble",
+                             subtitle: "A love note every morning", isOn: $dailyNotificationEnabled)
+
+                    if dailyNotificationEnabled {
+                        HStack {
+                            Label {
+                                Text("Notification time").font(AppFonts.body).foregroundColor(AppColors.textPrimary)
+                            } icon: {
+                                Image(systemName: "clock").foregroundColor(AppColors.river).frame(width: 20)
+                            }
+                            Spacer()
+                            Picker("", selection: $dailyNotificationHour) {
+                                ForEach(6..<23) { hour in
+                                    Text(formatHour(hour)).tag(hour)
+                                }
+                            }
+                            .tint(AppColors.river)
+                        }
+                        .padding(16)
+                        .settingsCard()
                     }
                 }
 
@@ -90,63 +173,84 @@ struct SettingsView: View {
                     textFieldRow(icon: "person", title: "Your name", text: $partnerName1)
                     textFieldRow(icon: "heart", title: "Their name", text: $partnerName2)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label { Text("Anniversary date").font(AppFonts.body).foregroundColor(AppColors.textPrimary) }
-                              icon: { Image(systemName: "calendar").foregroundColor(AppColors.river).frame(width: 20) }
-                        DatePicker("", selection: $anniversaryDate, displayedComponents: .date)
-                            .datePickerStyle(.compact)
-                            .tint(AppColors.river)
-                            .onChange(of: anniversaryDate) { _, newValue in
-                                anniversaryTimestamp = newValue.timeIntervalSince1970
+                    // Anniversary — hardcoded, display only
+                    HStack {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Anniversary").font(AppFonts.body).foregroundColor(AppColors.textPrimary)
+                                Text("The day it all began").font(AppFonts.badge).foregroundColor(AppColors.textMuted)
                             }
+                        } icon: {
+                            Image(systemName: "heart.circle").foregroundColor(AppColors.river).frame(width: 20)
+                        }
+                        Spacer()
+                        Text("June 20, 2022")
+                            .font(Font.custom("CormorantGaramond-Italic", size: 16))
+                            .foregroundColor(AppColors.river)
                     }
                     .padding(16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14).fill(AppColors.cardBg)
-                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.cardBorder, lineWidth: 1))
-                    )
+                    .settingsCard()
+                }
+
+                // Data
+                section(title: "DATA") {
+                    buttonRow(icon: "square.and.arrow.up", title: "Export Memories",
+                             subtitle: "Save a backup of your data") {
+                        // TODO: export
+                    }
+
+                    buttonRow(icon: "trash", title: "Clear All Data",
+                             subtitle: "Remove all memories and notes", isDestructive: true) {
+                        showClearDataConfirm = true
+                    }
                 }
 
                 // About
                 section(title: "ABOUT") {
                     infoRow(icon: "heart.circle", title: "Paws & Pebbles", value: "v1.0")
-                    infoRow(icon: "pawprint", title: "Made with love", value: "for Natty")
+                    infoRow(icon: "pawprint", title: "Made with love", value: "for Wifie Paws")
                 }
 
-                section(title: "") {
-                    buttonRow(icon: "arrow.counterclockwise", title: "Reset PIN",
-                             subtitle: "Remove current PIN and set a new one", isDestructive: true) {
-                        showResetConfirmation = true
-                    }
-                }
-
-                Spacer(minLength: 100)
+                Spacer(minLength: 140)
             }
             .padding(.horizontal, 20)
         }
         .hidesTabBarOnScroll()
         .background(AppColors.bgDeep)
         .onAppear {
-            anniversaryDate = Date(timeIntervalSince1970: anniversaryTimestamp)
             let context = LAContext()
             var error: NSError?
             biometricsAvailable = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
         }
-        .sheet(isPresented: $showChangePIN) {
-            ChangePINView()
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
+        .fullScreenCover(isPresented: $showChangePIN) {
+            GlassPINView(mode: .change, pinLength: pinLength)
         }
-        .alert("Reset PIN?", isPresented: $showResetConfirmation) {
+        .fullScreenCover(isPresented: $showSetupPIN) {
+            GlassPINView(mode: .setup, pinLength: pinLength) {
+                pinEnabled = true
+            }
+        }
+        .alert("Clear All Data?", isPresented: $showClearDataConfirm) {
             Button("Cancel", role: .cancel) {}
-            Button("Reset", role: .destructive) {
-                AuthService.shared.savePin("")
-                showChangePIN = true
+            Button("Clear Everything", role: .destructive) {
+                // TODO: clear SwiftData
             }
         } message: {
-            Text("You'll need to set a new PIN immediately.")
+            Text("This will permanently delete all memories, notes, and photos. This cannot be undone.")
         }
     }
+
+    // MARK: - Helpers
+
+    private func formatHour(_ hour: Int) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h a"
+        var components = DateComponents()
+        components.hour = hour
+        return formatter.string(from: Calendar.current.date(from: components) ?? Date())
+    }
+
+    // MARK: - Reusable Components
 
     private func section(title: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -169,8 +273,7 @@ struct SettingsView: View {
             Toggle("", isOn: isOn).tint(AppColors.river).labelsHidden()
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(AppColors.cardBg)
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.cardBorder, lineWidth: 1)))
+        .settingsCard()
     }
 
     private func buttonRow(icon: String, title: String, subtitle: String, isDestructive: Bool = false, action: @escaping () -> Void) -> some View {
@@ -200,8 +303,7 @@ struct SettingsView: View {
                 .multilineTextAlignment(.trailing).frame(maxWidth: 120)
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(AppColors.cardBg)
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.cardBorder, lineWidth: 1)))
+        .settingsCard()
     }
 
     private func infoRow(icon: String, title: String, value: String) -> some View {
@@ -212,7 +314,17 @@ struct SettingsView: View {
             Text(value).font(AppFonts.badge).foregroundColor(AppColors.textMuted)
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(AppColors.cardBg)
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.cardBorder, lineWidth: 1)))
+        .settingsCard()
+    }
+}
+
+// MARK: - Card Modifier
+
+extension View {
+    func settingsCard() -> some View {
+        self.background(
+            RoundedRectangle(cornerRadius: 14).fill(AppColors.cardBg)
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.cardBorder, lineWidth: 1))
+        )
     }
 }

@@ -4,6 +4,8 @@
 <dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Unlock Paws &amp; Pebbles with Face ID</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a photo for your Home screen</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>CormorantGaramond-Light.ttf</string>

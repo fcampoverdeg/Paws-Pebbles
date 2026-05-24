@@ -31,6 +31,10 @@ class AuthService {
         return getPin() != nil
     }
 
+    func getStoredPinLength() -> Int {
+        return getPin()?.count ?? 0
+    }
+
     private func getPin() -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

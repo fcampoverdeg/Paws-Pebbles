@@ -24,22 +24,32 @@ enum AppAnimations {
 }
 
 enum AppHaptics {
+    private static var enabled: Bool {
+        UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true
+    }
+
     static func cardUnfold() {
+        guard enabled else { return }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
     static func cardFold() {
+        guard enabled else { return }
         UIImpactFeedbackGenerator(style: .soft).impactOccurred()
     }
     static func explore() {
+        guard enabled else { return }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
     static func slide() {
+        guard enabled else { return }
         UISelectionFeedbackGenerator().selectionChanged()
     }
     static func back() {
+        guard enabled else { return }
         UIImpactFeedbackGenerator(style: .soft).impactOccurred()
     }
     static func photoTap() {
+        guard enabled else { return }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 }

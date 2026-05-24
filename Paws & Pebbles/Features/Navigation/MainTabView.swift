@@ -76,6 +76,8 @@ struct MainTabView: View {
     @State private var selectedTab: Int = 0
     @State private var showImmersive = false
     @State private var immersiveIndex: Int = 0
+    @State private var edgeSwipeOffset: CGFloat = 0
+    @State private var isEdgeSwiping = false
 
     private let tabs: [(icon: String, label: String)] = [
         ("house.fill", "Home"),
@@ -99,6 +101,73 @@ struct MainTabView: View {
                     .transition(.move(edge: .trailing))
                 } else {
                     pageContent
+                        .offset(x: edgeSwipeOffset)
+                        .overlay(alignment: .leading) {
+                            // Left edge drag zone
+                            Color.clear
+                                .frame(width: 40)
+                                .contentShape(Rectangle())
+                                .gesture(
+                                    DragGesture()
+                                        .onChanged { value in
+                                            isEdgeSwiping = true
+                                            let dx = value.translation.width
+                                            if selectedTab <= 0 {
+                                                edgeSwipeOffset = dx * 0.15
+                                            } else {
+                                                edgeSwipeOffset = max(0, dx)
+                                            }
+                                        }
+                                        .onEnded { value in
+                                            isEdgeSwiping = false
+                                            let dx = value.translation.width
+                                            if dx > 80 && selectedTab > 0 {
+                                                withAnimation(.bouncy(duration: 0.45, extraBounce: 0.12)) {
+                                                    selectedTab -= 1
+                                                    edgeSwipeOffset = 0
+                                                }
+                                                AppHaptics.slide()
+                                            } else {
+                                                withAnimation(.bouncy(duration: 0.4, extraBounce: 0.15)) {
+                                                    edgeSwipeOffset = 0
+                                                }
+                                            }
+                                        }
+                                )
+                        }
+                        .overlay(alignment: .trailing) {
+                            // Right edge drag zone
+                            Color.clear
+                                .frame(width: 40)
+                                .contentShape(Rectangle())
+                                .gesture(
+                                    DragGesture()
+                                        .onChanged { value in
+                                            isEdgeSwiping = true
+                                            let dx = value.translation.width
+                                            if selectedTab >= tabs.count - 1 {
+                                                edgeSwipeOffset = dx * 0.15
+                                            } else {
+                                                edgeSwipeOffset = min(0, dx)
+                                            }
+                                        }
+                                        .onEnded { value in
+                                            isEdgeSwiping = false
+                                            let dx = value.translation.width
+                                            if dx < -80 && selectedTab < tabs.count - 1 {
+                                                withAnimation(.bouncy(duration: 0.45, extraBounce: 0.12)) {
+                                                    selectedTab += 1
+                                                    edgeSwipeOffset = 0
+                                                }
+                                                AppHaptics.slide()
+                                            } else {
+                                                withAnimation(.bouncy(duration: 0.4, extraBounce: 0.15)) {
+                                                    edgeSwipeOffset = 0
+                                                }
+                                            }
+                                        }
+                                )
+                        }
                 }
             }
             .animation(.easeInOut(duration: 0.55), value: showImmersive)
@@ -141,6 +210,9 @@ struct MainTabView: View {
 
     // MARK: - Page Content (slides with pill drag)
 
+    // All tab views — kept alive to avoid first-load lag
+    @State private var preloadedTabs = false
+
     @ViewBuilder
     private func tabView(for index: Int) -> some View {
         switch index {
@@ -161,19 +233,26 @@ struct MainTabView: View {
         let screenW = UIScreen.main.bounds.width
 
         return ZStack {
-            // FROM page — slides out
-            tabView(for: fromIndex)
-                .offset(x: -t * screenW)
-                .opacity(1.0 - t * 0.5)
-
-            // TO page — slides in
-            if fromIndex != toIndex {
-                tabView(for: toIndex)
-                    .offset(x: screenW * (1.0 - t))
-                    .opacity(0.5 + t * 0.5)
+            // Pre-load all tabs hidden so they're ready
+            ForEach(0..<tabs.count, id: \.self) { index in
+                tabView(for: index)
+                    .opacity(index == fromIndex || index == toIndex ? 1 : 0)
+                    .zIndex(index == fromIndex || index == toIndex ? 1 : 0)
+                    .offset(x: tabOffset(for: index, from: fromIndex, to: toIndex, t: t, screenW: screenW))
+                    .allowsHitTesting(index == selectedTab && !isDragging)
             }
         }
         .clipped()
+    }
+
+    private func tabOffset(for index: Int, from: Int, to: Int, t: CGFloat, screenW: CGFloat) -> CGFloat {
+        if index == from {
+            return -t * screenW
+        } else if index == to && from != to {
+            return screenW * (1.0 - t)
+        } else {
+            return index < selectedTab ? -screenW : screenW
+        }
     }
 
     // Same as pill fractional index but for page tracking
